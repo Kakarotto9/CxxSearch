@@ -37,378 +37,376 @@ bool verbose = false;
 
 
 /*
-    Node class for Trie
-*/
+   Node class for Trie
+   */
 class Node {
-    public:
-        Node() { 
-            mContent = ' '; 
-            mMarker = false; 
-        }
-        ~Node() {}
-        /* Get node content */
-        char get() { 
-            return mContent; 
-        }
-        /* Set node content */
-        void set(char c) { 
-            mContent = c; 
-        }
-        /* Check if node is a marker */
-        bool isMarker() { 
-            return mMarker; 
-        }
-        /* Set node as a marker */
-        void setMarker() { 
-            mMarker = true; 
-        }
-        /* Append child node */
-        void append(Node* child) { 
-            mChildren.push_back(child); 
-        }
-        /* Get all children */
-        vector<Node*> children() { 
-            return mChildren; 
-        }
-        /* Find a child */
-        Node* find(char c);
+	public:
+		Node():mContent(''),mMarker(false) { 
+		}
+		~Node() {}
+		/* Get node content */
+		char get() { 
+			return mContent; 
+		}
+		/* Set node content */
+		void set(char c) { 
+			mContent = c; 
+		}
+		/* Check if node is a marker */
+		bool isMarker() { 
+			return mMarker; 
+		}
+		/* Set node as a marker */
+		void setMarker() { 
+			mMarker = true; 
+		}
+		/* Append child node */
+		void append(Node* child) { 
+			mChildren.push_back(child); 
+		}
+		/* Get all children */
+		vector<Node*> children() { 
+			return mChildren; 
+		}
+		/* Find a child */
+		Node* find(char c);
 
-    private:
-        char mContent;
-        bool mMarker;
-        vector<Node*> mChildren;
+	private:
+		char mContent;
+
+		vector<Node*> mChildren;
 };
 
 /* Node find child impl */
 Node* Node::find(char c) {
-    int l = mChildren.size();
-    Node* tmp;
-    int i;
+	int l = mChildren.size();
+	Node* tmp;
+	int i;
 
-    for (i = 0; i < l; i++) {
-        tmp = mChildren.at(i);
-        if (tmp->get() == c) {
-            return tmp;
-        }
-    }
 
-    return NULL;
+	for (i = 0; i < l; i++) {
+		tmp = mChildren.at(i);
+		if (tmp->get() == c) {
+			return tmp;
+		}
+	}
+
+	return NULL;
 };
 
 /*
-    Trie class
-*/
+   Trie class
+   */
 class Trie {
-    public:
-        Trie();
-        ~Trie();
-        /* Add nodes given a string */
-        void add(string s);
-        /* Search for a string in trie */
-        bool search(string s);
-    private:
-        Node* root;
+	public:
+		Trie();
+		~Trie();
+		/* Add nodes given a string */
+		void add(string s);
+		/* Search for a string in trie */
+		bool search(string s);
+	private:
+		Node* root;
 };
 
 /* Constructor: creates the root node */
 Trie::Trie() {
-    root = new Node();
+	root = new Node();
 }
 
 Trie::~Trie() {
-    // Free memory
-    // Should I do something here ??
+	// Free memory
+	// Should I do something here ??
 }
 
 /* Add nodes given a string */
 void Trie::add(string s) {
-    Node* curr = root;
-    int l = s.length();
+	Node* curr = root;
+	int l = s.length();
 
-    if (l == 0) {
-        curr->setMarker(); // an empty word
-        return;
-    }
+	if (l == 0) {
+		curr->setMarker(); // an empty word
+		return;
+	}
 
-    for (int i = 0; i < l; i++) { 
-        Node* child = curr->find(s[i]);
+	for (int i = 0; i < l; i++) { 
+		Node* child = curr->find(s[i]);
+		if(child==NULL)
+			break;
+		curr=child;
+	}
+	for(;i<l;i++){
+		Node* tmp = new Node();
+		tmp->set(s[i]);
+		curr->append(tmp);
+		curr = tmp;
+	}
 
-        if (child != NULL) {
-            curr = child;
-        } else {
-            Node* tmp = new Node();
-            tmp->set(s[i]);
-            curr->append(tmp);
-            curr = tmp;
-        }
-
-        if (i == l - 1) {
-            curr->setMarker();
-        }
-    }
+	curr->setMarker();
+}
 }
 
 /* Search for a string in trie */
 bool Trie::search(string s) {
-    Node* curr = root;
-    int l = s.length();
-    Node* tmp;
-    int i;
+	Node* curr = root;
+	int l = s.length();
+	Node* tmp;
+	int i;
 
-    while (curr != NULL) {
+	while (curr != NULL) {
 
-        for (i = 0; i < l; i++) {
-            tmp = curr->find(s[i]);
-            if ( tmp == NULL ) {
-                return false;
-            }
-            curr = tmp;
-        }
+		for (i = 0; i < l; i++) {
+			tmp = curr->find(s[i]);
+			if ( tmp == NULL ) {
+				return false;
+			}
+			curr = tmp;
+		}
 
-        if (curr->isMarker()) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+		if (curr->isMarker()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
-    return false;
+	return false;
 }
 
 /* Contain tries for cxxsearch */
 class CxxSearch {
-    public:
-        CxxSearch() { 
-            cRoot = "";
-        }
-        void root(string r) {
-            cRoot = r;
-        }
-        bool load(string &s);
-        Trie* get(string &s);
-        bool has(string &s);
+	public:
+		CxxSearch() { 
+			cRoot = "";
+		}
+		void root(string r) {
+			cRoot = r;
+		}
+		bool load(string &s);
+		Trie* get(string &s);
+		bool has(string &s);
 
-    private:
-        string cRoot;
-        std::map<string, Trie*> cxxsearch;
+	private:
+		string cRoot;
+		std::map<string, Trie*> cxxsearch;
 };
 
 /* Check if a corpus exists */
 bool CxxSearch::has(string &s) {
-    return cxxsearch.count(s) > 0;
+	return cxxsearch.count(s) > 0;
 };
 
 /* Load a corpus */
 bool CxxSearch::load(string &s) {
-    int t0 = ulf::get_time();
+	int t0 = ulf::get_time();
 
-    ifstream file(cRoot + s + ".txt");
-    if (!file) {
-        ulf::warning("CxxSearch cant load file " + cRoot + s + ".txt");
-        return false;
-    }
+	ifstream file(cRoot + s + ".txt");
+	if (!file) {
+		ulf::warning("CxxSearch cant load file " + cRoot + s + ".txt");
+		return false;
+	}
 
-    string line;
-    Trie* trie = new Trie();
-    int n = 0;
-    while(getline(file, line)){
+	string line;
+	Trie* trie = new Trie();
+	int n = 0;
+	while(getline(file, line)){
 
-        if (!trie->search(ulf::clean(line))) {
-            trie->add(ulf::clean(line));
-            n ++;
-        }
-    };
+		if (!trie->search(ulf::clean(line))) {
+			trie->add(ulf::clean(line));
+			n ++;
+		}
+	};
 
 
-    int t1 = ulf::get_time();
-    ulf::info("Loaded " + ulf::to_string(n) + " keywords from " + s + " in " + 
-        ulf::to_string(t1 - t0) + "ms");
+	int t1 = ulf::get_time();
+	ulf::info("Loaded " + ulf::to_string(n) + " keywords from " + s + " in " + 
+			ulf::to_string(t1 - t0) + "ms");
 
-    cxxsearch.insert(make_pair(s, trie));
-    return true;
+	cxxsearch.insert(make_pair(s, trie));
+	return true;
 };
 
 /* Get a corpus */
 Trie* CxxSearch::get(string &s) {
-    return cxxsearch.find(s)->second;
+	return cxxsearch.find(s)->second;
 };
 
 /* Process a query string */
 string process_query(CxxSearch* cxxsearch, string s) {
 
-    string response = "";
+	string response = "";
 
-    // First separate corpus list from keyword queried
-    string::size_type loc = s.find(" ", 0);
-    if( loc == string::npos ) {
-        ulf::warning("Separator not found in query " + s);
-        return "0";
-    }
-    string corpus_files = s.substr(0, loc);
-    string keyword = ulf::clean(s.substr(loc + 1, s.length()));
-    vector<string> files;
+	// First separate corpus list from keyword queried
+	string::size_type loc = s.find(" ", 0);
+	if( loc == string::npos ) {
+		ulf::warning("Separator not found in query " + s);
+		return "0";
+	}
+	string corpus_files = s.substr(0, loc);
+	string keyword = ulf::clean(s.substr(loc + 1, s.length()));
+	vector<string> files;
 
 
-    // Get list of corpuses
-    ulf::split(files, corpus_files, ',');
-    
-    if (files.size() == 0) {
-        ulf::warning("No file found");
-        return "0";
-    }
+	// Get list of corpuses
+	ulf::split(files, corpus_files, ',');
 
-    int found = 0;
-    // And finally query each corpus
-    for(vector<int>::size_type i = 0; i != files.size(); i++) {
+	if (files.size() == 0) {
+		ulf::warning("No file found");
+		return "0";
+	}
 
-        // Check if exists or load it
-        if (!cxxsearch->has(files[i]) && !cxxsearch->load(files[i])) {
-            ulf::warning("Unable to load corpus " + files[i]);
-            continue;
-        }
+	int found = 0;
+	// And finally query each corpus
+	for(vector<int>::size_type i = 0; i != files.size(); i++) {
 
-        int t0 = ulf::get_microtime();
-        // Search and append in response if found
-        if (cxxsearch->get(files[i])->search(keyword)) {
-            response += "," + files[i];
-            found += 1;
+		// Check if exists or load it
+		if (!cxxsearch->has(files[i]) && !cxxsearch->load(files[i])) {
+			ulf::warning("Unable to load corpus " + files[i]);
+			continue;
+		}
 
-            if (verbose) {
-                ulf::debug(keyword + " found in corpus '" + files[i]
-                    + "' in " + ulf::to_string(ulf::get_microtime() - t0) + " microsecs");
-            }
-        }
-    }
+		int t0 = ulf::get_microtime();
+		// Search and append in response if found
+		if (cxxsearch->get(files[i])->search(keyword)) {
+			response += "," + files[i];
+			found += 1;
 
-    if (found > 0) {
-        return ulf::to_string(found) + response;
-    }
-    return "0";
+			if (verbose) {
+				ulf::debug(keyword + " found in corpus '" + files[i]
+						+ "' in " + ulf::to_string(ulf::get_microtime() - t0) + " microsecs");
+			}
+		}
+	}
+
+	if (found > 0) {
+		return ulf::to_string(found) + response;
+	}
+	return "0";
 }
 
 
 /* Setup socket server and wait for connections */
 void setup_server(CxxSearch* cxxsearch) {
-    /* Prepare address structre and other variables */
-    int socket_reusable=1;
-    struct sockaddr_in serv_addr;
-    int sockfd;
+	/* Prepare address structre and other variables */
+	int socket_reusable=1;
+	struct sockaddr_in serv_addr;
+	int sockfd;
 
-    // clear address structure
-    memset(&serv_addr,0, sizeof(serv_addr));
+	// clear address structure
+	memset(&serv_addr,0, sizeof(serv_addr));
 
-    serv_addr.sin_family = AF_INET;  
-    serv_addr.sin_port = htons(sock_port);
+	serv_addr.sin_family = AF_INET;  
+	serv_addr.sin_port = htons(sock_port);
 
-    /* Create socket */
-    sockfd = socket(PF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0) {
-        ulf::error("Socket not created");
-    }
+	/* Create socket */
+	sockfd = socket(PF_INET, SOCK_STREAM, 0);
+	if (sockfd < 0) {
+		ulf::error("Socket not created");
+	}
 
-    /* Sometimes we can't restart the server immediately if it was stopped,
-        the port is retained for a few seconds. Allow reusing address let restart
-        cxxsearch immediately */
-    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &socket_reusable,
-            sizeof(int)) == -1) {
-        ulf::error("Setting socket option SO_REUSEADDR failed");
-    }
+	/* Sometimes we can't restart the server immediately if it was stopped,
+	   the port is retained for a few seconds. Allow reusing address let restart
+	   cxxsearch immediately */
+	if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &socket_reusable,
+				sizeof(int)) == -1) {
+		ulf::error("Setting socket option SO_REUSEADDR failed");
+	}
 
-    /* Bind socket */
-    if (bind(sockfd, (struct sockaddr *) &serv_addr,
-            sizeof(serv_addr)) < 0) {
-        ulf::error("Socket not binded");
-    }
+	/* Bind socket */
+	if (bind(sockfd, (struct sockaddr *) &serv_addr,
+				sizeof(serv_addr)) < 0) {
+		ulf::error("Socket not binded");
+	}
 
-    /* Listen ! Keep 10 connections waiting before refusing connections */
-    listen(sockfd, 10);
+	/* Listen ! Keep 10 connections waiting before refusing connections */
+	listen(sockfd, 10);
 
-    if (verbose) {
-        ulf::debug("Server started on " + sock_host + ":" + to_string(sock_port));
-    }
+	if (verbose) {
+		ulf::debug("Server started on " + sock_host + ":" + to_string(sock_port));
+	}
 
-    /* And loop over requests :) */
-    for(;;) {
-        socklen_t clilen;
-        struct sockaddr_in cli_addr;
+	/* And loop over requests :) */
+	for(;;) {
+		socklen_t clilen;
+		struct sockaddr_in cli_addr;
 
-        /* Yes! A new message! */
-        int newsockfd = accept(sockfd, 
-                (struct sockaddr *) &cli_addr, &clilen);
+		/* Yes! A new message! */
+		int newsockfd = accept(sockfd, 
+				(struct sockaddr *) &cli_addr, &clilen);
 
-        if (newsockfd < 0) {
-            ulf::warning("Error occured while accepting a message. Transaction aborted.");
-            continue;
-        }
+		if (newsockfd < 0) {
+			ulf::warning("Error occured while accepting a message. Transaction aborted.");
+			continue;
+		}
 
-        char buffer[256];
-        int n;
-        /* Let's receive it*/
-        /* TODO: accept messages longer than 254*/
-        n = recv(newsockfd, buffer, 254, 0);
-        if (n < 0) {
-            ulf::warning("Error occured while reading a message. Transaction aborted.");
-            return;
-        }
+		char buffer[256];
+		int n;
+		/* Let's receive it*/
+		/* TODO: accept messages longer than 254*/
+		n = recv(newsockfd, buffer, 254, 0);
+		if (n < 0) {
+			ulf::warning("Error occured while reading a message. Transaction aborted.");
+			return;
+		}
 
-        /* Delimiter */
-        buffer[n] = '\0';
+		/* Delimiter */
+		buffer[n] = '\0';
 
-        /* Process the query */
-        string r = process_query(cxxsearch, string(buffer));
+		/* Process the query */
+		string r = process_query(cxxsearch, string(buffer));
 
-        /* Send answer */
-        send(newsockfd, r.c_str(), r.size(), 0);
+		/* Send answer */
+		send(newsockfd, r.c_str(), r.size(), 0);
 
-        /* And close socket! */
-        close(newsockfd);
-    }
+		/* And close socket! */
+		close(newsockfd);
+	}
 
-    // Never reached but looks cleaner ?
-    close(sockfd);
+	// Never reached but looks cleaner ?
+	close(sockfd);
 }
 
 /*
-    Main entry point
+   Main entry point
 
-    Options:
-    - First argument: root of cxxsearch files
+Options:
+- First argument: root of cxxsearch files
 */
 int main(int argc, char* argv[]) {
 
-    CxxSearch* cxxsearch = new CxxSearch();
+	CxxSearch* cxxsearch = new CxxSearch();
 
-    /* Check arguments */
-    for(int i = 0; i < argc; i++) {
-        /* verbose mode */
-        if (strncmp(argv[i], "-v", 2) == 0) {
-            verbose = true;
-        /* root path for cxxsearch files */
-        } else if (strncmp(argv[i], "-r", 2) == 0) {
-            i++;
-            cout << "Initializing with root " << argv[i] << endl;
-            cxxsearch->root(argv[i]); 
-        /* Port */
-        } else if (strncmp(argv[i], "-p", 2) == 0) {
-            i++;
-            sock_port = ulf::to_int(argv[i]);
-        /* Host */
-        } else if (strncmp(argv[i], "-h", 2) == 0) {
-            i++;
-            sock_host = argv[i];
-        /* Help: show how to use */
-        } else if (strncmp(argv[i], "--help", 2) == 0) {
-            cout << "\nCxxSearch v" << VERSION << "\n" << endl;
-            cout << "Options:" << endl;
-            cout << "  --help         Show help and exit" << endl;
-            cout << "  -r [root]      Set root path for corpus files" << endl;
-            cout << "  -p [port]      Socket port" << endl;
-            cout << "  -h [host]      Socket host" << endl;
-            cout << "  -v             Activate verbose mode" << endl;
-            cout << "\nCreated for Minethat in 2014\n" << endl;
-            exit(0);
-        }
-    }
+	/* Check arguments */
+	for(int i = 0; i < argc; i++) {
+		/* verbose mode */
+		if (strncmp(argv[i], "-v", 2) == 0) {
+			verbose = true;
+			/* root path for cxxsearch files */
+		} else if (strncmp(argv[i], "-r", 2) == 0) {
+			i++;
+			cout << "Initializing with root " << argv[i] << endl;
+			cxxsearch->root(argv[i]); 
+			/* Port */
+		} else if (strncmp(argv[i], "-p", 2) == 0) {
+			i++;
+			sock_port = ulf::to_int(argv[i]);
+			/* Host */
+		} else if (strncmp(argv[i], "-h", 2) == 0) {
+			i++;
+			sock_host = argv[i];
+			/* Help: show how to use */
+		} else if (strncmp(argv[i], "--help", 2) == 0) {
+			cout << "\nCxxSearch v" << VERSION << "\n" << endl;
+			cout << "Options:" << endl;
+			cout << "  --help         Show help and exit" << endl;
+			cout << "  -r [root]      Set root path for corpus files" << endl;
+			cout << "  -p [port]      Socket port" << endl;
+			cout << "  -h [host]      Socket host" << endl;
+			cout << "  -v             Activate verbose mode" << endl;
+			cout << "\nCreated for Minethat in 2014\n" << endl;
+			exit(0);
+		}
+	}
 
-    setup_server(cxxsearch);
+	setup_server(cxxsearch);
 }
