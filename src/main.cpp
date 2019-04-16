@@ -35,202 +35,7 @@ bool verbose = false;
 
 
 
-
-/*
-   Node class for Trie
-   */
-class Node {
-	public:
-		Node():mContent(''),mMarker(false) { 
-		}
-		~Node() {}
-		/* Get node content */
-		char get() { 
-			return mContent; 
-		}
-		/* Set node content */
-		void set(char c) { 
-			mContent = c; 
-		}
-		/* Check if node is a marker */
-		bool isMarker() { 
-			return mMarker; 
-		}
-		/* Set node as a marker */
-		void setMarker() { 
-			mMarker = true; 
-		}
-		/* Append child node */
-		void append(Node* child) { 
-			mChildren.push_back(child); 
-		}
-		/* Get all children */
-		vector<Node*> children() { 
-			return mChildren; 
-		}
-		/* Find a child */
-		Node* find(char c);
-
-	private:
-		char mContent;
-
-		vector<Node*> mChildren;
-};
-
-/* Node find child impl */
-Node* Node::find(char c) {
-	int l = mChildren.size();
-	Node* tmp;
-	int i;
-
-
-	for (i = 0; i < l; i++) {
-		tmp = mChildren.at(i);
-		if (tmp->get() == c) {
-			return tmp;
-		}
-	}
-
-	return NULL;
-};
-
-/*
-   Trie class
-   */
-class Trie {
-	public:
-		Trie();
-		~Trie();
-		/* Add nodes given a string */
-		void add(string s);
-		/* Search for a string in trie */
-		bool search(string s);
-	private:
-		Node* root;
-};
-
-/* Constructor: creates the root node */
-Trie::Trie() {
-	root = new Node();
-}
-
-Trie::~Trie() {
-	// Free memory
-	// Should I do something here ??
-}
-
-/* Add nodes given a string */
-void Trie::add(string s) {
-	Node* curr = root;
-	int l = s.length();
-
-	if (l == 0) {
-		curr->setMarker(); // an empty word
-		return;
-	}
-
-	for (int i = 0; i < l; i++) { 
-		Node* child = curr->find(s[i]);
-		if(child==NULL)
-			break;
-		curr=child;
-	}
-	for(;i<l;i++){
-		Node* tmp = new Node();
-		tmp->set(s[i]);
-		curr->append(tmp);
-		curr = tmp;
-	}
-
-	curr->setMarker();
-}
-}
-
-/* Search for a string in trie */
-bool Trie::search(string s) {
-	Node* curr = root;
-	int l = s.length();
-	Node* tmp;
-	int i;
-
-	while (curr != NULL) {
-
-		for (i = 0; i < l; i++) {
-			tmp = curr->find(s[i]);
-			if ( tmp == NULL ) {
-				return false;
-			}
-			curr = tmp;
-		}
-
-		if (curr->isMarker()) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	return false;
-}
-
-/* Contain tries for cxxsearch */
-class CxxSearch {
-	public:
-		CxxSearch() { 
-			cRoot = "";
-		}
-		void root(string r) {
-			cRoot = r;
-		}
-		bool load(string &s);
-		Trie* get(string &s);
-		bool has(string &s);
-
-	private:
-		string cRoot;
-		std::map<string, Trie*> cxxsearch;
-};
-
-/* Check if a corpus exists */
-bool CxxSearch::has(string &s) {
-	return cxxsearch.count(s) > 0;
-};
-
-/* Load a corpus */
-bool CxxSearch::load(string &s) {
-	int t0 = ulf::get_time();
-
-	ifstream file(cRoot + s + ".txt");
-	if (!file) {
-		ulf::warning("CxxSearch cant load file " + cRoot + s + ".txt");
-		return false;
-	}
-
-	string line;
-	Trie* trie = new Trie();
-	int n = 0;
-	while(getline(file, line)){
-
-		if (!trie->search(ulf::clean(line))) {
-			trie->add(ulf::clean(line));
-			n ++;
-		}
-	};
-
-
-	int t1 = ulf::get_time();
-	ulf::info("Loaded " + ulf::to_string(n) + " keywords from " + s + " in " + 
-			ulf::to_string(t1 - t0) + "ms");
-
-	cxxsearch.insert(make_pair(s, trie));
-	return true;
-};
-
-/* Get a corpus */
-Trie* CxxSearch::get(string &s) {
-	return cxxsearch.find(s)->second;
-};
-
+<<<<<<< HEAD
 /* Process a query string */
 string process_query(CxxSearch* cxxsearch, string s) {
 
@@ -366,12 +171,15 @@ void setup_server(CxxSearch* cxxsearch) {
 	close(sockfd);
 }
 
+<<<<<<< HEAD
 /*
    Main entry point
 
 Options:
 - First argument: root of cxxsearch files
 */
+=======
+>>>>>>> 58e1766948ae5a138b0e77400434fcbaa4876ff2
 int main(int argc, char* argv[]) {
 
 	CxxSearch* cxxsearch = new CxxSearch();
